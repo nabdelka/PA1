@@ -20,7 +20,7 @@ int main() {
 
 // TODO dnsQuery
 //	-	got a string
-//	- return
+//	- return hostnet
 
 
 //  https://moodle.tau.ac.il/mod/forum/discuss.php?d=72022

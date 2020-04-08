@@ -1,0 +1,4 @@
+﻿  nsclient.c
+c:\users\no-or\documents\github\pa1\nsclient\nsclient\nsclient.c(21): warning C4013: 'printf' undefined; assuming extern returning int
+c:\users\no-or\documents\github\pa1\nsclient\nsclient\nsclient.c(23): warning C4013: 'gets' undefined; assuming extern returning int
+  nsclient.vcxproj -> C:\Users\no-or\Documents\GitHub\PA1\nsclient\Debug\nsclient.exe

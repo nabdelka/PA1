@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="communication.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="nsclient.c" />
   </ItemGroup>

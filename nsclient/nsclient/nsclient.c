@@ -15,32 +15,22 @@
 // HOSTENT structure: https://docs.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-hostent
 //  https://moodle.tau.ac.il/mod/forum/discuss.php?d=72022
 
-void dnsQuery(char *host_name, char *dns_server_ip) { // TODO change return type to struct
+// Global string - DNS IP
+char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
 
-	// Initialize Winsock
-	WSADATA wsaData;
-	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != NO_ERROR) {
-		printf("Error while initializing windows networking\n");
-		return -1;
-	}
+void dnsQuery(char *host_name) { // TODO change return type to struct
 
-	// Create Socket
-	SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (s = INVALID_SOCKET) {
-		printf("Error while creating socket\n");
-		return -1;
-	}
+	char recv_buf[500];
+	// TODO build a message
+	int check = send_msg_and_rcv_rspns(host_name, strlen(host_name), recv_buf);
+	printf("Got check: %d\n", check);
 
-	struct sockaddr_in     servaddr;
-	memset(&servaddr, 0, sizeof(servaddr));
 
-	// Filling server information 
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(DNS_PORT);
-	servaddr.sin_addr.s_addr = INADDR_ANY; // TODO server ip address
+	return;
 
 }
+
+int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]);
 
 int main_program(char *dns_ip_address) {
 
@@ -55,6 +45,15 @@ int main_program(char *dns_ip_address) {
 		return -1;
 	}
 
+	// Install ip address from command line to global buffer
+	errno_t err_code = strcpy_s(dns_ip_address_global, MAX_IP_ADDRESS_LEN, dns_ip_address);
+	if (err_code != 0) {
+		printf("Error while Copying IP address. please check lenght\n");
+		return -1;
+	}
+
+
+	char buffer[132];
 	// inf loop
 	while (1) {
 
@@ -67,7 +66,11 @@ int main_program(char *dns_ip_address) {
 		if (is_legal(domain_name_str)) {
 			//	if good -> call dnsQuery
 			// TODO
+			
+			int check = send_msg_and_rcv_rspns(domain_name_str, strlen(domain_name_str),buffer);
+			printf("Got check: %d\n", check);
 
+			/*
 			remoteHost = gethostbyname(domain_name_str);
 			char **pAlias;
 			if (remoteHost == NULL) {
@@ -109,7 +112,7 @@ int main_program(char *dns_ip_address) {
 				{
 					printf("NETBIOS address was returned\n");
 				}
-			}
+			}*/
 
 
 		}
@@ -120,6 +123,7 @@ int main_program(char *dns_ip_address) {
 
 
 	}
+	WSACleanup();
 
 	return 0;
 

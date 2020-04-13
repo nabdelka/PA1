@@ -24,9 +24,9 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 	//func to switch the hostname to the appropriate format
 	// TODO move to function
 	short header_array[LINES_IN_HEADER];
-	header_array[FLAGS] = 0;
+	for( int i=0; i< LINES_IN_HEADER; i++)	header_array[i] = 0;
 
-	header_array[FLAGS] |= 0x8000;
+	header_array[QCOUNT] = 1;
 
 	int i = 0, len = 0, startlabel = 0;
 	char hostname[257];
@@ -51,8 +51,9 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 
 	char recv_buf[500];
 	// TODO build a message
-	int check = send_msg_and_rcv_rspns(host_name, strlen(host_name), recv_buf);
-	printf("Got check: %d\n", check);
+	int check = send_msg_and_rcv_rspns(header_array, 12, recv_buf);
+	recv_buf[check] = '\0';
+	printf("Got check: %d %s\n", check);
 
 
 	return;
@@ -94,10 +95,8 @@ int main_program(char *dns_ip_address) {
 		if (is_legal(domain_name_str)) {
 			//	if good -> call dnsQuery
 			// TODO
-			printf("ERROR: GOOD NAME\n");
-			int check = send_msg_and_rcv_rspns(domain_name_str, strlen(domain_name_str),buffer);
-			printf("Got check: %d\n", check);
-
+			printf("GOOD NAME\n");
+			dnsQuery(domain_name_str);
 			/*
 			remoteHost = gethostbyname(domain_name_str);
 			char **pAlias;

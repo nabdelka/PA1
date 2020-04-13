@@ -10,3 +10,5 @@
 int main_program(char *dns_ip_address);
 bool is_quit(char *str);
 bool is_legal(char *str);
+bool is_digit(char digit);
+bool is_num(char num);

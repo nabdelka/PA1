@@ -20,6 +20,28 @@ char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
 
 void dnsQuery(char *host_name) { // TODO change return type to struct
 
+	//func to switch the hostname to the appropriate format
+	int i = 0, len = 0, startlabel = 0;
+	char hostname[257];
+	while (host_name[i] != '\0') {
+		if (host_name[i] != '.') {
+			hostname[i + 1] = host_name[i];
+			len = len + 1;
+			i = i + 1;
+		}
+		else {
+			i = i + 1;
+			hostname[startlabel] = len + 1;
+			len = 0;
+			startlabel = i;
+		}
+	}
+	if (host_name[i] == '\0') {
+		hostname[i + 1] = 0;
+	}
+	// end of the func
+	char message[511];
+
 	char recv_buf[500];
 	// TODO build a message
 	int check = send_msg_and_rcv_rspns(host_name, strlen(host_name), recv_buf);
@@ -33,7 +55,6 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]);
 
 int main_program(char *dns_ip_address) {
-
 	char domain_name_str[MAX_DOMAIN_NAME_LEN + 1] = { 0 };
 	struct hostent *remoteHost;
 
@@ -66,7 +87,7 @@ int main_program(char *dns_ip_address) {
 		if (is_legal(domain_name_str)) {
 			//	if good -> call dnsQuery
 			// TODO
-			
+			printf("ERROR: GOOD NAME\n");
 			int check = send_msg_and_rcv_rspns(domain_name_str, strlen(domain_name_str),buffer);
 			printf("Got check: %d\n", check);
 
@@ -134,9 +155,49 @@ int main_program(char *dns_ip_address) {
 // Checking functions:
 
 bool is_legal(char *str) {
+	int i = 1;
+	if (!(is_digit(str[0]))) {
+		return false;
+	}
+	while (str[i] != '\0') {
+		if (str[i] == '.' && str[i + 1] != '\0') {
+			if (!(is_digit(str[i + 1]))) {
+				return false;
+			}
+			else if (!(is_digit(str[i - 1])) && !(is_num(str[i - 1]))) {
+				return false;
+			}
+			i = i + 2;
+			continue;
+		}
+		else if (str[i] == '.' && str[i + 1] == '/0') {
+			return false;
+		}
+		else if (!(is_digit(str[i])) && !(is_num(str[i])) && !(str[i] == '_')) {
+			return false;
+		}
+		i = i + 1;
+	}
+	if ((str[i] == '\0') && str[i - 1] == '_') {
+		return false;
+	}
+	return true;
 	// TODO check in str if leggal return true/false
 	// https://moodle.tau.ac.il/mod/forum/discuss.php?d=69030
-	return true;
+}
+
+
+
+bool is_num(char num) {
+	if (num >= '0' && num <= '9') return true;
+	else                         return false;
+}
+
+
+bool is_digit(char digit) {
+	if (((digit >= 'A') && (digit <= 'Z')) || ((digit >= 'a') && (digit <= 'z'))) return true;
+	else                         return false;
+	
 }
 
 bool is_quit(char *str) {
@@ -144,3 +205,6 @@ bool is_quit(char *str) {
 	if( strcmp(str,"quit") == 0) return true;
 	else                         return false;
 }
+
+
+

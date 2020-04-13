@@ -17,10 +17,17 @@
 
 // Global string - DNS IP
 char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
+short id_counter = 0;
 
 void dnsQuery(char *host_name) { // TODO change return type to struct
 
 	//func to switch the hostname to the appropriate format
+	// TODO move to function
+	short header_array[LINES_IN_HEADER];
+	header_array[FLAGS] = 0;
+
+	header_array[FLAGS] |= 0x8000;
+
 	int i = 0, len = 0, startlabel = 0;
 	char hostname[257];
 	while (host_name[i] != '\0') {

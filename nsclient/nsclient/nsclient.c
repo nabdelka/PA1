@@ -21,13 +21,9 @@ short id_counter = 0;
 
 void dnsQuery(char *host_name) { // TODO change return type to struct
 
-	//func to switch the hostname to the appropriate format
-	// TODO move to function
-	short header_array[LINES_IN_HEADER];
-	header_array[FLAGS] = 0;
 
-	header_array[FLAGS] |= 0x8000;
-
+	// TODO move to function	
+//func to switch the hostname to the appropriate format
 	int i = 0, len = 0, startlabel = 0;
 	char hostname[257];
 	while (host_name[i] != '\0') {
@@ -47,7 +43,24 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 		hostname[i + 1] = 0;
 	}
 	// end of the func
-	char message[511];
+	
+	short header_array[LINES_IN_HEADER]; //ID starts to count from 0
+//header_array[FLAGS] |= 0x8000;
+	header_array[FLAGS] = 0;
+	header_array[ID] = 0;
+	header_array[QCOUNT] = 1;
+	header_array[ANCOUNT] = 0;
+	header_array[NSCOUNT] = 0;
+	header_array[ARCOUNT] = 0;
+	char question_array[259]; // 0-254 name, 255-256 Qtype , 257-258 QCLASS
+	int i = 0;
+	while (hostname[i] != 0) {
+		question_array[i] = hostname[i];
+	}
+	question_array[255] = '0';
+	question_array[256] = '1';
+	question_array[257] = 'I';
+	question_array[258] = 'N'; //QCLASS For internet is IN
 
 	char recv_buf[500];
 	// TODO build a message

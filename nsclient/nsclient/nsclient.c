@@ -56,6 +56,7 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 	int i = 0;
 	while (hostname[i] != 0) {
 		question_array[i] = hostname[i];
+		i = i + 1;
 	}
 	question_array[255] = '0';
 	question_array[256] = '1';

@@ -12,6 +12,8 @@ int main(int argc, char *argv[]) {
 
 	//return main_program(argv[1]); TODO
 	return main_program("10.0.0.138");
+	//return main_program("8.8.8.8");
+
 	//return main_program("127.0.0.1");
 
 	

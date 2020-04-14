@@ -13,7 +13,7 @@
 // Noor's DNS server IP: 10.0.0.138
 // UDP programming reference: https://www.geeksforgeeks.org/udp-server-client-implementation-c/ 
 // HOSTENT structure: https://docs.microsoft.com/en-us/windows/win32/api/winsock/ns-winsock-hostent
-//  https://moodle.tau.ac.il/mod/forum/discuss.php?d=72022
+
 
 // Global string - DNS IP
 char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
@@ -23,10 +23,10 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 
 	//func to switch the hostname to the appropriate format
 	// TODO move to function
-	short header_array[LINES_IN_HEADER];
-	for( int i=0; i< LINES_IN_HEADER; i++)	header_array[i] = 0;
+	//short header_array[LINES_IN_HEADER];
+	//for( int i=0; i< LINES_IN_HEADER; i++)	header_array[i] = 0;
 
-	header_array[QCOUNT] = 1;
+	//header_array[QCOUNT] = 1;
 
 	int i = 0, len = 0, startlabel = 0;
 	char hostname[257];
@@ -38,39 +38,59 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 		}
 		else {
 			i = i + 1;
-			hostname[startlabel] = len + 1;
+			hostname[startlabel] = len;
 			len = 0;
 			startlabel = i;
 		}
 	}
 	if (host_name[i] == '\0') {
+		hostname[startlabel] = len;
 		hostname[i + 1] = 0;
 	}
 	// end of the func
+	printf("Host name:\n");
+	for (int j = 0; j < strlen(hostname) + 1; j++) printf("%d ", hostname[j]);
+	printf("\n");
+
 	
 	short header_array[LINES_IN_HEADER]; //ID starts to count from 0
-//header_array[FLAGS] |= 0x8000;
 	header_array[FLAGS] = 0;
 	header_array[ID] = 0;
 	header_array[QCOUNT] = 1;
 	header_array[ANCOUNT] = 0;
 	header_array[NSCOUNT] = 0;
 	header_array[ARCOUNT] = 0;
-	char question_array[259]; // 0-254 name, 255-256 Qtype , 257-258 QCLASS
-	int i = 0;
+
+	char send_buff[512];
+	for (int j = 0; j < LINES_IN_HEADER; j++) send_buff[2 * j] = header_array[j] >> 8;
+	for (int j = 0; j < LINES_IN_HEADER; j++) send_buff[2 * j + 1] = header_array[j] && 0xFF;
+
+	i = 0;
 	while (hostname[i] != 0) {
-		question_array[i] = hostname[i];
+		send_buff[LINES_IN_HEADER * 2 + i] = hostname[i];
+		i++;
 	}
-	question_array[255] = '0';
-	question_array[256] = '1';
-	question_array[257] = 'I';
-	question_array[258] = 'N'; //QCLASS For internet is IN
+	send_buff[LINES_IN_HEADER * 2 + i] = 0;
+	send_buff[LINES_IN_HEADER * 2 + i + 1] = 0;
+	send_buff[LINES_IN_HEADER * 2 + i + 2] = 1;
+	send_buff[LINES_IN_HEADER * 2 + i + 3] = 0;
+	send_buff[LINES_IN_HEADER * 2 + i + 4] = 1; //QCLASS For internet is IN
+
+
+
+
+	for (int j = 0; j < LINES_IN_HEADER * 2 + i + 5; j++) {
+		printf("%d ", send_buff[j]);
+		if (j % 8 == 7) printf("\n");
+	}
+	printf("\n");
+
+
 
 	char recv_buf[500];
 	// TODO build a message
-	int check = send_msg_and_rcv_rspns(header_array, 12, recv_buf);
-	recv_buf[check] = '\0';
-	printf("Got check: %d %s\n", check);
+	int check = send_msg_and_rcv_rspns(send_buff, LINES_IN_HEADER * 2 + i + 5, recv_buf);
+
 
 
 	return;

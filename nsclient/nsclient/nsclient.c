@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "winsock2.h"
-#include "nsclient.h"
+#include "nsclient_header.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -87,11 +87,48 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 
 
 
-	char recv_buf[500];
+	char unsigned recv_buf[500];
 	// TODO build a message
 	int check = send_msg_and_rcv_rspns(send_buff, LINES_IN_HEADER * 2 + i + 5, recv_buf);
+	printf("MSG:\n");
+	bool check_len = TRUE;
+	int cur_len = -1;
+	int j;
+	// Print name
+	for (j = LINES_IN_HEADER * 2; j < 500; j++) {
+		if (recv_buf[j] == 0) break;
+		if (check_len) {
+			if (cur_len == 0) printf(".");
+			if ((recv_buf[j] >> 6) & 0x3) {
+				//comppressed
+				j += 2;
+			}
+			check_len = FALSE;
+			cur_len = recv_buf[j];
+			continue;
+		}
+		else {
+			cur_len--;
+			printf("%c", recv_buf[j]);
+			if (cur_len == 0) check_len = TRUE;
+			
+		}
 
-
+	}
+	j += 1; // 0 byte
+	printf("\n");
+	j += 4; // Qtype and class
+	if ((recv_buf[j] >> 6) & 0x3) {
+		//comppressed
+		j += 2;
+	}
+	else {
+		printf("Error: not compressed\n");
+	}
+	j += 8; 
+	j += 2; // RDLENGTH
+	printf("IP: %d.%d.%d.%d\n", recv_buf[j], recv_buf[j+1], recv_buf[j+2], recv_buf[j+3]);
+	   	  
 
 	return;
 
@@ -100,6 +137,7 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]);
 
 int main_program(char *dns_ip_address) {
+
 	char domain_name_str[MAX_DOMAIN_NAME_LEN + 1] = { 0 };
 	struct hostent *remoteHost;
 
@@ -118,9 +156,7 @@ int main_program(char *dns_ip_address) {
 		return -1;
 	}
 
-
-	char buffer[132];
-	// inf loop
+	// program loop
 	while (1) {
 
 		printf("nsclient> ");
@@ -131,8 +167,6 @@ int main_program(char *dns_ip_address) {
 		// check input syntax
 		if (is_legal(domain_name_str)) {
 			//	if good -> call dnsQuery
-			// TODO
-			printf("GOOD NAME\n");
 			dnsQuery(domain_name_str);
 			/*
 			remoteHost = gethostbyname(domain_name_str);
@@ -199,15 +233,15 @@ int main_program(char *dns_ip_address) {
 
 bool is_legal(char *str) {
 	int i = 1;
-	if (!(is_digit(str[0]))) {
+	if (!(is_letter(str[0]))) {
 		return false;
 	}
 	while (str[i] != '\0') {
 		if (str[i] == '.' && str[i + 1] != '\0') {
-			if (!(is_digit(str[i + 1]))) {
+			if (!(is_letter(str[i + 1]))) {
 				return false;
 			}
-			else if (!(is_digit(str[i - 1])) && !(is_num(str[i - 1]))) {
+			else if (!(is_letter(str[i - 1])) && !(is_num(str[i - 1]))) {
 				return false;
 			}
 			i = i + 2;
@@ -216,7 +250,7 @@ bool is_legal(char *str) {
 		else if (str[i] == '.' && str[i + 1] == '/0') {
 			return false;
 		}
-		else if (!(is_digit(str[i])) && !(is_num(str[i])) && !(str[i] == '_')) {
+		else if (!(is_letter(str[i])) && !(is_num(str[i])) && !(str[i] == '_')) {
 			return false;
 		}
 		i = i + 1;
@@ -229,15 +263,12 @@ bool is_legal(char *str) {
 	// https://moodle.tau.ac.il/mod/forum/discuss.php?d=69030
 }
 
-
-
 bool is_num(char num) {
 	if (num >= '0' && num <= '9') return true;
 	else                         return false;
 }
 
-
-bool is_digit(char digit) {
+bool is_letter(char digit) {
 	if (((digit >= 'A') && (digit <= 'Z')) || ((digit >= 'a') && (digit <= 'z'))) return true;
 	else                         return false;
 	

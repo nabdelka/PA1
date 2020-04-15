@@ -124,7 +124,7 @@
     <ClCompile Include="nsclient.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="nsclient.h" />
+    <ClInclude Include="nsclient_header.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

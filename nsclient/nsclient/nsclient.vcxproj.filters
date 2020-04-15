@@ -26,7 +26,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="nsclient.h">
+    <ClInclude Include="nsclient_header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

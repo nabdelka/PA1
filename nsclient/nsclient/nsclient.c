@@ -155,6 +155,7 @@ void header_checker(unsigned char *header) {
 		if (i == 1) {
 			id1 = header[i];
 			id = id0 || id1;
+
 		}
 		if (i == 2) {
 			QR = header[i] & 0x80;
@@ -179,28 +180,28 @@ void header_checker(unsigned char *header) {
 		}
 		if (i == 5) {
 			QDCOUNT1 = header[i];
-			//QDCOUNT = QDCOUNT1 || QDCOUNT0;
+			QDCOUNT = QDCOUNT1 || QDCOUNT0;
 		}
 		if (i == 6) {
 			ANCOUNT0 = header[i];
 		}
 		if (i == 7) {
 			ANCOUNT1 = header[i];
-			//ANCOUNT = ANCOUNT1 || ANCOUNT0;
+			ANCOUNT = ANCOUNT1 || ANCOUNT0;
 		}
 		if (i == 8) {
 			NSCOUNT0 = header[i];
 		}
 		if (i == 9) {
 			NSCOUNT1 = header[i];
-			//NSCOUNT = NSCOUNT0 || NSCOUNT1;
+			NSCOUNT = NSCOUNT0 || NSCOUNT1;
 		}
 		if (i == 10) {
 			ARCOUNT0 = header[i];
 		}
 		if (i == 11) {
 			ARCOUNT1 = header[i];
-			//ARCOUNT = ARCOUNT0 || ARCOUNT1 ;
+			ARCOUNT = ARCOUNT0 || ARCOUNT1 ;
 		}
 		i = i + 1;
 	}
@@ -208,7 +209,7 @@ void header_checker(unsigned char *header) {
 	printf("\n");
 	printf("HEADER CHECK:\n");
 
-	printf("%d\n", ARCOUNT1);
+	printf("%d\n", id);
 
 	return;
 }

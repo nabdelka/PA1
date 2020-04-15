@@ -17,7 +17,7 @@
 
 // Global string - DNS IP
 char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
-short id_counter = 0;
+short id_counter = 1;
 
 void dnsQuery(char *host_name) { // TODO change return type to struct
 
@@ -128,11 +128,95 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 	j += 8; 
 	j += 2; // RDLENGTH
 	printf("IP: %d.%d.%d.%d\n", recv_buf[j], recv_buf[j+1], recv_buf[j+2], recv_buf[j+3]);
+	header_checker(recv_buf);
 	   	  
 
 	return;
 
 }
+
+
+
+///////// header check func///////
+
+void header_checker(unsigned char *header) {
+	int i=0;
+	char id0, id1,id,QR,Opcode,AA,TC,RD,RA,Z,RCODE;
+	char QDCOUNT0, QDCOUNT1 , QDCOUNT;
+	char ANCOUNT0, ANCOUNT1, ANCOUNT;
+	char NSCOUNT0, NSCOUNT1 , NSCOUNT;
+	char ARCOUNT0, ARCOUNT1 , ARCOUNT;
+	while(i <12){
+
+		if (i == 0) {
+			id0 = header[i];
+			printf("%d\n", m);
+		}
+		if (i == 1) {
+			id1 = header[i];
+			id = id0 || id1;
+
+		}
+		if (i == 2) {
+			QR = header[i] && 0x80;
+			QR = QR >> 7;
+			Opcode = header[i] && 0x78;
+			Opcode = Opcode >> 3;
+			AA = header[i] && 0x04;
+			AA = AA >> 2;
+			TC = header[i] && 0x02;
+			TC = TC >> 1;
+			RD = header[i] && 0x01;
+		}
+		if (i == 3) {
+			RA = header[i] && 0x80;
+			RA = RA >> 7;
+			Z = header[i] && 0x70;
+			Z = Z >> 4;
+			RCODE= header[i] && 0x0F;
+		}
+		if (i == 4) {
+			QDCOUNT0 = header[i];
+		}
+		if (i == 5) {
+			QDCOUNT1 = header[i];
+			QDCOUNT = QDCOUNT1 || QDCOUNT0;
+		}
+		if (i == 6) {
+			ANCOUNT0 = header[i];
+		}
+		if (i == 7) {
+			ANCOUNT1 = header[i];
+			ANCOUNT = ANCOUNT1 || ANCOUNT0;
+		}
+		if (i == 8) {
+			NSCOUNT0 = header[i];
+		}
+		if (i == 9) {
+			NSCOUNT1 = header[i];
+			NSCOUNT = NSCOUNT0 || NSCOUNT1;
+		}
+		if (i == 10) {
+			ARCOUNT0 = header[i];
+		}
+		if (i == 11) {
+			ARCOUNT1 = header[i];
+			ARCOUNT = ARCOUNT0 || ARCOUNT1 ;
+		}
+		i = i + 1;
+	}
+	printf("\n");
+	printf("\n");
+	printf("HEADER CHECK:\n");
+
+	printf("%d\n", id);
+
+	return;
+}
+///////// finishing header check func////////
+
+
+
 
 int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]);
 

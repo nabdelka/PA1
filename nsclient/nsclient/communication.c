@@ -13,7 +13,7 @@
 extern char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
 
 
-int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]) { // TODO parameter
+int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[MAX_MSG_LEN]) {
 
 	// Create Socket
 	SOCKET SendSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -29,7 +29,6 @@ int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]) { //
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(DNS_PORT);
 	servaddr.sin_addr.s_addr = inet_addr(dns_ip_address_global);
-	printf("Sending to IP: %s\n", dns_ip_address_global); // TODO remove
 
 	// Send all message to the receiver
 	int already_sent = 0;
@@ -43,13 +42,11 @@ continue_sending:
 		if (already_sent != msg_len) goto continue_sending;
 	}
 	else { // iResult == SOCKET_ERROR
-		printf("sendto failed with error: %d\n", WSAGetLastError());
+		perror("sendto failed");
 		closesocket(SendSocket);
 		WSACleanup();
 		return -1;
 	}
-	printf("Finished sending\n"); // TODO remove
-	SOCKET RecvSocket;
 
 	struct timeval tv;
 	tv.tv_sec = MAX_WAIT_TIME_SEC;
@@ -57,42 +54,36 @@ continue_sending:
 	fd_set read_fds;
 	FD_ZERO(&read_fds);
 	FD_SET(SendSocket, &read_fds);
-	//rcv_again:
+
 	iResult = select(SendSocket + 1, &read_fds, NULL, NULL, &tv);
 	if (iResult == 0) {
-		printf("Select TIMEOUT\n");
-		return 0;
+		printf("TIMEOUT\n");
+		return -1;
 	}
 	else if (iResult < 0) {
-		printf("Select FAILED\n");
+		perror("select failed");
 		return -1;
 	}
 
 	// Receive response
-	iResult = recv(SendSocket, rcv_buf, 500, 0); // TODO parameter
-	if (iResult > 0)
-		printf("Bytes received: %d\n", iResult);
-	else if (iResult == 0)
-		printf("Connection closed\n");
-	else
-		printf("recv failed: %d\n", WSAGetLastError());
-
-	rcv_buf[iResult] = '\0';
-	printf("Server : %s\n", rcv_buf);
-	
-	for (int j = 0; j < iResult; j++) printf("%X%X ", (rcv_buf[j]>>4)&0x0f, rcv_buf[j]&0x0f);
-	printf("\n");
-	//goto rcv_again;
-	//---------------------------------------------
-	// When the application is finished sending, close the socket.
-	printf("Closing socket.\n");
-	iResult = closesocket(SendSocket);
-	if (iResult == SOCKET_ERROR) {
-		printf("closesocket failed with error: %d\n", WSAGetLastError());
-		WSACleanup();
+	iResult = recv(SendSocket, rcv_buf, MAX_MSG_LEN, 0); 
+	if (iResult <= 0)
+	{
+		perror("recv failed");
 		return -1;
 	}
 
-	return 0;
+	// TODO remove
+	printf("Bytes received: %d\n", iResult); 
+	for (int j = 0; j < iResult; j++) printf("%X%X ", (rcv_buf[j]>>4)&0x0f, rcv_buf[j]&0x0f);
+	printf("\n");
 
+
+	iResult = closesocket(SendSocket);
+	if (iResult == SOCKET_ERROR) {
+		perror("close socket failed");
+		return -1;
+	}
+
+	return iResult;
 }

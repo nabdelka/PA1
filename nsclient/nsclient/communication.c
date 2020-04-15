@@ -4,16 +4,16 @@
 #include <string.h>
 #include <stdio.h>
 #include "winsock2.h"
-#include "nsclient.h"
+#include "nsclient_header.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
  
-// Global string - DNS IP
+// Global string - DNS IP from command line
 extern char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
 
 
-int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]) {
+int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]) { // TODO parameter
 
 	// Create Socket
 	SOCKET SendSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -29,7 +29,7 @@ int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[500]) {
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(DNS_PORT);
 	servaddr.sin_addr.s_addr = inet_addr(dns_ip_address_global);
-	printf("Sending to IP: %s\n", dns_ip_address_global);
+	printf("Sending to IP: %s\n", dns_ip_address_global); // TODO remove
 
 	// Send all message to the receiver
 	int already_sent = 0;
@@ -48,7 +48,7 @@ continue_sending:
 		WSACleanup();
 		return -1;
 	}
-	printf("Finished sending\n");
+	printf("Finished sending\n"); // TODO remove
 	SOCKET RecvSocket;
 
 	struct timeval tv;
@@ -57,6 +57,7 @@ continue_sending:
 	fd_set read_fds;
 	FD_ZERO(&read_fds);
 	FD_SET(SendSocket, &read_fds);
+	//rcv_again:
 	iResult = select(SendSocket + 1, &read_fds, NULL, NULL, &tv);
 	if (iResult == 0) {
 		printf("Select TIMEOUT\n");
@@ -67,9 +68,7 @@ continue_sending:
 		return -1;
 	}
 
-	
-	// Receive until the peer closes the connection
-	//rcv_again:
+	// Receive response
 	iResult = recv(SendSocket, rcv_buf, 500, 0); // TODO parameter
 	if (iResult > 0)
 		printf("Bytes received: %d\n", iResult);
@@ -81,7 +80,7 @@ continue_sending:
 	rcv_buf[iResult] = '\0';
 	printf("Server : %s\n", rcv_buf);
 	
-	for (int j = 0; j < iResult; j++) printf("%d ", rcv_buf[j]);
+	for (int j = 0; j < iResult; j++) printf("%X%X ", (rcv_buf[j]>>4)&0x0f, rcv_buf[j]&0x0f);
 	printf("\n");
 	//goto rcv_again;
 	//---------------------------------------------
@@ -93,7 +92,7 @@ continue_sending:
 		WSACleanup();
 		return -1;
 	}
-	//---------------------------------------------
+
 	return 0;
 
 }

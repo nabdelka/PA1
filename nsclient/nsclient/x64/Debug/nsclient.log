@@ -1,12 +1,12 @@
-﻿  nsclient.c
+﻿  communication.c
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\communication.c(61): warning C4244: 'function': conversion from 'SOCKET' to 'int', possible loss of data
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\communication.c(52): warning C4101: 'RecvSocket': unreferenced local variable
+  main.c
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\main.c(14): warning C4013: 'main_program' undefined; assuming extern returning int
+  nsclient.c
 c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(94): warning C4013: 'send_msg_and_rcv_rspns' undefined; assuming extern returning int
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(144): warning C4028: formal parameter 1 different from declaration
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(149): warning C4101: 'NSCOUNT': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(146): warning C4101: 'id': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(147): warning C4101: 'QDCOUNT': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(150): warning C4101: 'ARCOUNT': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(148): warning C4101: 'ANCOUNT': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(241): warning C4013: 'gets' undefined; assuming extern returning int
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(220): warning C4101: 'remoteHost': unreferenced local variable
-c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(244): warning C4101: 'i': unreferenced local variable
-  nsclient.vcxproj -> C:\Users\Ameer Kayal\Desktop\PA1\nsclient\x64\Debug\nsclient.exe
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(144): error C2371: 'header_checker': redefinition; different basic types
+  c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient_header.h(26): note: see declaration of 'header_checker'
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(224): warning C4033: 'header_checker' must return a value
+c:\users\ameer kayal\desktop\pa1\nsclient\nsclient\nsclient.c(257): warning C4013: 'gets' undefined; assuming extern returning int
+  Generating Code...

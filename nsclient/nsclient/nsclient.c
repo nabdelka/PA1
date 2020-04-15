@@ -130,10 +130,7 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 int header_checker(unsigned char *header) {
 	int i=0;
 	unsigned char id0, id1,id,QR,Opcode,AA,TC,RD,RA,Z,RCODE;
-	char QDCOUNT0, QDCOUNT1 , QDCOUNT;
-	char ANCOUNT0, ANCOUNT1, ANCOUNT;
-	char NSCOUNT0, NSCOUNT1 , NSCOUNT;
-	char ARCOUNT0, ARCOUNT1 , ARCOUNT;
+	char ANCOUNT, QDCOUNT , NSCOUNT, ARCOUNT;
 	
 	// Checking ID in header
 	id = (header[0] << 8) | header[1];
@@ -141,73 +138,45 @@ int header_checker(unsigned char *header) {
 		printf("Error in recived id!");
 		return -1;
 	}
-
-
-
-	while(i <12){
-		if (i == 0) {
-			id0 = header[i];
-		}
-		if (i == 1) {
-			id1 = header[i];
-			id = id0 || id1;
-
-		}
-		if (i == 2) {
-			QR = header[i] & 0x80;
-			QR = QR >> 7;
-			Opcode = header[i] & 0x78;
-			Opcode = Opcode >> 3;
-			AA = header[i] & 0x04;
-			AA = AA >> 2;
-			TC = header[i] & 0x02;
-			TC = TC >> 1;
-			RD = header[i] & 0x01;
-		}
-		if (i == 3) {
-			RA = header[i] & 0x80;
-			RA = RA >> 7;
-			Z = header[i] & 0x70;
-			Z = Z >> 4;
-			RCODE= header[i] & 0x0F;
-		}
-		if (i == 4) {
-			QDCOUNT0 = header[i];
-		}
-		if (i == 5) {
-			QDCOUNT1 = header[i];
-			QDCOUNT = QDCOUNT1 || QDCOUNT0;
-		}
-		if (i == 6) {
-			ANCOUNT0 = header[i];
-		}
-		if (i == 7) {
-			ANCOUNT1 = header[i];
-			ANCOUNT = ANCOUNT1 || ANCOUNT0;
-		}
-		if (i == 8) {
-			NSCOUNT0 = header[i];
-		}
-		if (i == 9) {
-			NSCOUNT1 = header[i];
-			NSCOUNT = NSCOUNT0 || NSCOUNT1;
-		}
-		if (i == 10) {
-			ARCOUNT0 = header[i];
-		}
-		if (i == 11) {
-			ARCOUNT1 = header[i];
-			ARCOUNT = ARCOUNT0 || ARCOUNT1 ;
-		}
-		i = i + 1;
+	QR = header[2] & 0x80;
+	QR = QR >> 7;
+	if (QR != 1) {
+		printf("Error in recived QR!");
+		return -1;
 	}
-	printf("\n");
-	printf("\n");
-	printf("HEADER CHECK:\n");
-
-	printf("%d\n", id);
-
-	return;
+	Opcode = header[2] & 0x78;
+	Opcode = Opcode >> 3;
+	if (Opcode != 0) {
+		printf("Error in recived Opcode!");
+		return -1;
+	}
+	AA = header[2] & 0x04;
+	AA = AA >> 2;
+	TC = header[2] & 0x02;
+	TC = TC >> 1;
+	RD = header[2] & 0x01;
+	RA = header[3] & 0x80;
+	RA = RA >> 7;
+	Z = header[3] & 0x70;
+	Z = Z >> 4;
+	RCODE = header[3] & 0x0F;
+	if (RCODE != 0) {
+		printf("Error in recived RCODE!");
+		return -1;
+	}
+	QDCOUNT = (header[4] << 8) | header[5];
+	if (QDCOUNT != 1) {
+		printf("Error in recived QDCOUNT!");
+		return -1;
+	}
+	ANCOUNT = (header[6] << 8) | header[7];
+	if (ANCOUNT != 1) {
+		printf("Error in recived ANCOUNT!");
+		return -1;
+	}
+	NSCOUNT = (header[8] << 8) | header[9];
+	ARCOUNT = (header[10] << 8) | header[11];
+	return 0;
 }
 ///////// finishing header check func////////
 

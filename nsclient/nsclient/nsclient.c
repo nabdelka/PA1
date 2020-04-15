@@ -55,12 +55,14 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 	
 	short header_array[LINES_IN_HEADER]; //ID starts to count from 0
 	header_array[FLAGS] = 0;
-	header_array[ID] = 0;
+	header_array[ID] = 5;
 	header_array[QCOUNT] = 1;
 	header_array[ANCOUNT] = 0;
 	header_array[NSCOUNT] = 0;
 	header_array[ARCOUNT] = 0;
 
+
+	printf("%d\n", header_array[ID]);
 	char send_buff[512];
 	for (int j = 0; j < LINES_IN_HEADER; j++) send_buff[2 * j] = header_array[j] >> 8;
 	for (int j = 0; j < LINES_IN_HEADER; j++) send_buff[2 * j + 1] = header_array[j] && 0xFF;
@@ -147,15 +149,11 @@ void header_checker(unsigned char *header) {
 	char NSCOUNT0, NSCOUNT1 , NSCOUNT;
 	char ARCOUNT0, ARCOUNT1 , ARCOUNT;
 	while(i <12){
-
 		if (i == 0) {
 			id0 = header[i];
-			printf("%d\n", m);
 		}
 		if (i == 1) {
 			id1 = header[i];
-			id = id0 || id1;
-
 		}
 		if (i == 2) {
 			QR = header[i] && 0x80;
@@ -180,28 +178,24 @@ void header_checker(unsigned char *header) {
 		}
 		if (i == 5) {
 			QDCOUNT1 = header[i];
-			QDCOUNT = QDCOUNT1 || QDCOUNT0;
 		}
 		if (i == 6) {
 			ANCOUNT0 = header[i];
 		}
 		if (i == 7) {
 			ANCOUNT1 = header[i];
-			ANCOUNT = ANCOUNT1 || ANCOUNT0;
 		}
 		if (i == 8) {
 			NSCOUNT0 = header[i];
 		}
 		if (i == 9) {
 			NSCOUNT1 = header[i];
-			NSCOUNT = NSCOUNT0 || NSCOUNT1;
 		}
 		if (i == 10) {
 			ARCOUNT0 = header[i];
 		}
 		if (i == 11) {
 			ARCOUNT1 = header[i];
-			ARCOUNT = ARCOUNT0 || ARCOUNT1 ;
 		}
 		i = i + 1;
 	}
@@ -209,8 +203,8 @@ void header_checker(unsigned char *header) {
 	printf("\n");
 	printf("HEADER CHECK:\n");
 
-	printf("%d\n", id);
-
+	printf("%d\n", id0);
+	printf("%d\n", id1);
 	return;
 }
 ///////// finishing header check func////////

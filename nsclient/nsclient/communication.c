@@ -69,7 +69,7 @@ continue_sending:
 
 	
 	// Receive until the peer closes the connection
-
+	//rcv_again:
 	iResult = recv(SendSocket, rcv_buf, 500, 0); // TODO parameter
 	if (iResult > 0)
 		printf("Bytes received: %d\n", iResult);
@@ -81,6 +81,9 @@ continue_sending:
 	rcv_buf[iResult] = '\0';
 	printf("Server : %s\n", rcv_buf);
 	
+	for (int j = 0; j < iResult; j++) printf("%d ", rcv_buf[j]);
+	printf("\n");
+	//goto rcv_again;
 	//---------------------------------------------
 	// When the application is finished sending, close the socket.
 	printf("Closing socket.\n");

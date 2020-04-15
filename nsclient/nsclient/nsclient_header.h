@@ -23,4 +23,5 @@ bool is_quit(char *str);
 bool is_legal(char *str);
 bool is_letter(char digit);
 bool is_num(char num);
-void header_checker(char *header);
+int header_checker(unsigned char *header);
+void convert_hostname(char *source, char dest[255]);

@@ -139,14 +139,25 @@ void dnsQuery(char *host_name) { // TODO change return type to struct
 
 ///////// header check func///////
 
-void header_checker(unsigned char *header) {
+int header_checker(unsigned char *header) {
 	int i=0;
 	unsigned char id0, id1,id,QR,Opcode,AA,TC,RD,RA,Z,RCODE;
 	char QDCOUNT0, QDCOUNT1 , QDCOUNT;
 	char ANCOUNT0, ANCOUNT1, ANCOUNT;
 	char NSCOUNT0, NSCOUNT1 , NSCOUNT;
 	char ARCOUNT0, ARCOUNT1 , ARCOUNT;
+	
+	// Checking ID in header
+	id = (header[0] << 8) | header[1];
+	if (id != id_counter) {
+		printf("Error in recived id!");
+		return -1;
+	}
+
+
+
 	while(i <12){
+
 
 		if (i == 0) {
 			id0 = header[i];

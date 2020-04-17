@@ -408,16 +408,18 @@ int ip_checker(char *ip) {
 			if (num < 0 || num>255) {
 				printf("ERROR: BAD IP\n");
 				return -1;
+				points = points - 1;
+				nums = nums - 1;
+				if (points < 0 || nums < 0) {
+					printf("ERROR: BAD IP\n");
+					return -1;
+				}
 			}
-			points = points - 1;
-			nums = nums - 1;
-			if (points < 0 || nums < 0) {
-				printf("ERROR: BAD IP\n");
-				return -1;
+			else {
+				num = 0;
 			}
 		}
 		i++;
-
 	}
 	return 0;
 }

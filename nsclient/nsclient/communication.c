@@ -73,11 +73,6 @@ continue_sending:
 		return -1;
 	}
 
-	// TODO remove
-	printf("Bytes received: %d\n", iResult); 
-	for (int j = 0; j < iResult; j++) printf("%X%X ", (rcv_buf[j]>>4)&0x0f, rcv_buf[j]&0x0f);
-	printf("\n");
-
 
 	iResult = closesocket(SendSocket);
 	if (iResult == SOCKET_ERROR) {

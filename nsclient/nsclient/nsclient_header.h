@@ -30,3 +30,5 @@ bool is_num(char num);
 int header_checker(unsigned char *header);
 void convert_hostname(char *source, char dest[255]);
 int send_msg_and_rcv_rspns(char * send_buf, int msg_len, char rcv_buf[MAX_MSG_LEN]);
+struct hostent *get_init_hostent_ptr();
+int ip_checker(char *header);

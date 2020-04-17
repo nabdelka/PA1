@@ -14,6 +14,7 @@
 char dns_ip_address_global[MAX_IP_ADDRESS_LEN];
 // Global ID counter
 short id_counter = 1;
+int ip_counter = 0;
 
 
 int read_question(char *buffer, int start_idx){
@@ -70,17 +71,23 @@ int read_answer(char *buffer, int start_idx, unsigned char ip_buffer[4]) {
 	}
 	j = j + 1; // Qtype and Qclass
 	unsigned short type = ((buffer[j] << 8) | buffer[j + 1]);
-	printf("TYPE = %d\n", type);
 	j += 8; // type and class and ttl
 	unsigned short rdlength = ((buffer[j] << 8) | buffer[j + 1]);
-	printf("RDLENGTH = %d\n", type);
 	j += 2; // rdlength
 
 	ip_buffer[0] = buffer[j];
-	ip_buffer[1] = buffer[j+1];
-	ip_buffer[2] = buffer[j+2];
-	ip_buffer[3] = buffer[j+3];
-	if ( type == 1) printf("IP = %d.%d.%d.%d\n", ip_buffer[0], ip_buffer[1], ip_buffer[2], ip_buffer[3]);
+	ip_buffer[1] = buffer[j + 1];
+	ip_buffer[2] = buffer[j + 2];
+	ip_buffer[3] = buffer[j + 3];
+	
+	if ((type == 1)&(rdlength == 4)) {
+
+		ip_buffer[4] = 0;
+	}
+	else {
+		// not IP
+		ip_buffer[4] = 1;
+	}
 
 	return j + rdlength;
 
@@ -90,7 +97,7 @@ struct hostent *dnsQuery(char *host_name) {
 
 	char hostname_labels[257];
 	convert_hostname(host_name, hostname_labels);
-
+	ip_counter = 0;
 	short header_array[LINES_IN_HEADER];
 	char send_buff[MAX_MSG_LEN];
 	char unsigned recv_buf[MAX_MSG_LEN];
@@ -128,17 +135,23 @@ struct hostent *dnsQuery(char *host_name) {
 
 	check = header_checker(recv_buf);
 	if (check < 0) return NULL;
-	printf("Got %d Answers\n", check);// TODO remove
+
+	// Allocate memory for hostent struct and init
+	struct hostent *hostent_ptr = get_init_hostent_ptr();
+	if (hostent_ptr == NULL)	return NULL;
 
 	int cur_idx = read_question(recv_buf , LINES_IN_HEADER * 2);
 	char ip[5];
 	for (int k = 0; k < check; k++) {
 		cur_idx = read_answer(recv_buf, cur_idx, ip);
+		if (ip[4] == 0) {
+			if (add_ip(hostent_ptr, ip) != 0) return NULL;
+			ip_counter++;
+		}
 	}
 	   	  
 	id_counter++;
-	return NULL;
-
+	return hostent_ptr;
 }
 
 
@@ -163,6 +176,51 @@ void convert_hostname(char *source, char dest[255]) {
 		dest[startlabel] = len;
 		dest[i + 1] = 0;
 	}
+
+}
+
+struct hostent *get_init_hostent_ptr() {
+	struct hostent *ptr = (struct hostent *)malloc(sizeof(struct hostent));
+	char **addr_list = (char **)malloc(sizeof(char*));
+	if ((ptr == NULL)|(addr_list == NULL)) {
+		perror("Memory Error");
+		return NULL;
+	}
+	addr_list[0] = NULL;
+	ptr->h_name = NULL;
+	ptr->h_aliases = NULL;
+	ptr->h_addrtype = AF_INET;
+	ptr->h_length = 4;
+	ptr->h_addr_list = addr_list;
+	return ptr;
+
+}
+
+int add_ip(struct hostent *ptr, char ip[5]) {
+	ptr->h_addr_list = realloc(ptr->h_addr_list, (ip_counter + 2) * sizeof(char*));
+	char *new_ip = (char *)malloc(4 * sizeof(char));
+	if ((ptr->h_addr_list == NULL) | (new_ip == NULL)) {
+		perror("Memory Error");
+		return -1;
+	}
+	new_ip[0] = ip[0];
+	new_ip[1] = ip[1];
+	new_ip[2] = ip[2];
+	new_ip[3] = ip[3];
+
+	ptr->h_addr_list[ip_counter] = new_ip;
+	ptr->h_addr_list[ip_counter + 1] = NULL;			
+	return 0;
+}
+
+void free_hostent_memory(struct hostent *ptr) {
+	int i = 0;
+	while (ptr->h_addr_list[i] != NULL) {
+		free(ptr->h_addr_list[i]);
+		i++;
+	}
+	free(ptr->h_addr_list);
+	free(ptr);
 
 }
 
@@ -193,33 +251,19 @@ int main_program(char *dns_ip_address) {
 		gets(domain_name_str);
 
 		if (is_quit(domain_name_str)) break;
-		int i;
+
 		// check input syntax
 		if (is_legal(domain_name_str)) {
 			//	if good -> call dnsQuery
 			remoteHost = dnsQuery(domain_name_str);
-			
-			//remoteHost = gethostbyname(domain_name_str);
 			if (remoteHost != NULL) {
-				
-				printf("Address length: %d\n", remoteHost->h_length);
-
-				i = 0;
-				struct in_addr addr;
-				if (remoteHost->h_addrtype == AF_INET)
-				{
-					while (remoteHost->h_addr_list[i] != 0) {
-						addr.s_addr = *(u_long *)remoteHost->h_addr_list[i++];
-						printf("\tIP Address #%d: %s\n", i, inet_ntoa(addr));
+				if (remoteHost->h_addrtype == AF_INET) {
+					if( remoteHost->h_addr_list[0] != NULL ) {
+						printf("%d.%d.%d.%d\n", (unsigned char)remoteHost->h_addr_list[0][0], (unsigned char)remoteHost->h_addr_list[0][1], (unsigned char)remoteHost->h_addr_list[0][2], (unsigned char)remoteHost->h_addr_list[0][3]);
 					}
 				}
-				else if (remoteHost->h_addrtype == AF_NETBIOS)// TODO remove
-				{
-					printf("NETBIOS address was returned\n");
-				}
+				free_hostent_memory(remoteHost);
 			}
-
-
 		}
 		else {
 			// Error msg: illegal domain name
@@ -354,6 +398,27 @@ int header_checker(unsigned char *header) {
 	return ANCOUNT;
 }
 
-
+int ip_checker(char *ip) {
+	int i = 0, num = 0, points = 3, nums = 4;
+	while (ip[i] != '\0') {
+		if (ip[i] != '.') {
+			num = num * 10 + (ip[i] - '0');
+		}
+		else {
+			if (num < 0 || num>255) {
+				printf("ERROR: BAD IP\n");
+				return -1;
+			}
+		}
+		points = points - 1;
+		// this fails with input 10.0.0.38 due to nums more than 4 TODO
+		nums = nums - 1;
+		if (points < 0 || nums < 0) {
+			printf("ERROR: BAD IP\n");
+			return -1;
+		}
+	}
+	return 0;
+}
 
 

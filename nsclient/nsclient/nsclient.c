@@ -409,14 +409,15 @@ int ip_checker(char *ip) {
 				printf("ERROR: BAD IP\n");
 				return -1;
 			}
+			points = points - 1;
+			nums = nums - 1;
+			if (points < 0 || nums < 0) {
+				printf("ERROR: BAD IP\n");
+				return -1;
+			}
 		}
-		points = points - 1;
-		// this fails with input 10.0.0.38 due to nums more than 4 TODO
-		nums = nums - 1;
-		if (points < 0 || nums < 0) {
-			printf("ERROR: BAD IP\n");
-			return -1;
-		}
+		i++;
+
 	}
 	return 0;
 }

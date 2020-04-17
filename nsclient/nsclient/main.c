@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	
 }
 void ip_checker(char *header) {
-	int i, num=0 ,points = 3, nums = 4;
+	int i=0, num=0 ,points = 3, nums = 4;
 	while (header[i] != '\0') {
 		if (header[i] != '.') {
 			num = num * 10 + (header[i] - '0');

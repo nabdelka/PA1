@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
 	if (ip_checker(argv[1]) == -1) return -1;
 
 	return main_program(argv[1]); 
-	//return main_program("10.0.0.138"); 
 	
 }
 
